@@ -129,7 +129,7 @@ const sectionObserver = new IntersectionObserver(revealSection, {
 });
 allSections.forEach(section => {
   sectionObserver.observe(section);
-  section.classList.add('section--hidden');
+  // section.classList.add('section--hidden');
 });
 
 // img lazy loading
@@ -155,3 +155,82 @@ const imgObserver = new IntersectionObserver(loadImg, {
 });
 
 imgTargets.forEach(img => imgObserver.observe(img));
+
+// sliders
+
+const slides = document.querySelectorAll('.slide');
+
+const buttonLeft = document.querySelector('.slider__btn--left');
+const buttonRight = document.querySelector('.slider__btn--right');
+
+const dotContainer = document.querySelector('.dots');
+
+let currentSlide = 0;
+
+const maxSlide = slides.length;
+
+const createDots = () => {
+  slides.forEach((_, index) => {
+    dotContainer.insertAdjacentHTML(
+      'beforeend',
+      `<button class="dots__dot" data-slide="${index}"></button>`
+    );
+  });
+};
+
+createDots();
+
+const activateDot = slide => {
+  document
+    .querySelectorAll('.dots__dot')
+    .forEach(dot => dot.classList.remove('dots__dot--active'));
+  document
+    .querySelector(`.dots__dot[data-slide="${slide}"]`)
+    .classList.add('dots__dot--active');
+};
+
+const goToSlide = slide => {
+  slides.forEach(
+    (slideActive, index) =>
+      (slideActive.style.transform = `translateX(${100 * (index - slide)}%)`)
+  );
+  activateDot(currentSlide);
+};
+goToSlide(0);
+
+const nextSlide = () => {
+  if (currentSlide === maxSlide - 1) {
+    currentSlide = 0;
+  } else currentSlide++;
+
+  goToSlide(currentSlide);
+};
+
+const prevSlide = () => {
+  if (currentSlide === 0) {
+    currentSlide = maxSlide - 1;
+  } else {
+    currentSlide--;
+  }
+
+  goToSlide(currentSlide);
+};
+
+buttonRight.addEventListener('click', nextSlide);
+buttonLeft.addEventListener('click', prevSlide);
+
+// keyboard event on slider
+document.addEventListener('keydown', e => {
+  e.key === 'ArrowLeft' && prevSlide();
+  e.key === 'ArrowRight' && nextSlide();
+});
+
+// dots event delegation(dotContainer)
+dotContainer.addEventListener('click', e => {
+  if (e.target.classList.contains('dots__dot')) {
+    const { slide } = e.target.dataset;
+    const intSlide = parseInt(slide);
+    goToSlide(intSlide);
+    activateDot(intSlide);
+  }
+});
